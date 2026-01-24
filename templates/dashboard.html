@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="dashboard container">
+        <h2>Dashboard</h2>
+        
+        {% if user and user.is_admin %}
+        <div class="admin-badge">
+            <span>👑 Administrator</span>
+            <a href="/admin/users" class="button small">Manage Users</a>
+        </div>
+        {% endif %}
+        
+        <p>Active Monitors: {{ monitors }}</p>
+        <p>API Keys: {{ api_keys }}</p>
+    </div>
+    
+    <style>
+    .admin-badge {
+        background: #e7f3ff;
+        border: 2px solid #007bff;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .admin-badge span {
+        font-weight: 600;
+        color: #007bff;
+    }
+    
+    .button.small {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        background: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+    }
+    </style>
+{% endblock %}

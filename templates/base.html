@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <title>{% block title %}CronPulse{% endblock %}</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <header>
+        <div class="header-content container">
+            <img src="/static/new_logo.png" alt="CronPulse Logo" width="200" class="logo">
+            {% if current_user %}
+                    <p>Welcome, {{ current_user.email }}</p>
+            {% endif %}
+            <nav class="nav">    
+                <ul>
+                    {% if current_user %}
+                        <li><a href="/dashboard/ui">Dashboard</a></li>
+                        <li><a href="/monitors/ui">Monitors</a></li>
+                        <li><a href="/api-keys/ui">API Keys</a></li>
+                        <li><a href="/logout" class="logout">Logout</a></li>
+                    {% else %}
+                        <li><a href="/login/ui">Login</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    {# include site footer #}
+    {% include "footer.html" %}
+
+</body>
+</html>

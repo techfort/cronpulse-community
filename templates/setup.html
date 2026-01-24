@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Setup - CronPulse{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h1>🔧 Welcome to CronPulse!</h1>
+  <h2>Initial Setup</h2>
+  
+  <p>No users exist yet. Let's create your admin account to get started.</p>
+  
+  {% if error %}
+  <div class="error-message">{{ error }}</div>
+  {% endif %}
+  
+  <form method="POST" action="/setup">
+    <div class="form-group">
+      <label for="email">Admin Email:</label>
+      <input type="email" id="email" name="email" required 
+             placeholder="admin@example.com">
+      <small>This will be your admin login email</small>
+    </div>
+    
+    <div class="form-group">
+      <label for="password">Admin Password:</label>
+      <input type="password" id="password" name="password" required 
+             minlength="8"
+             placeholder="Use a strong password">
+      <small>Minimum 8 characters recommended</small>
+    </div>
+    
+    <div class="form-group">
+      <label for="confirm_password">Confirm Password:</label>
+      <input type="password" id="confirm_password" name="confirm_password" required 
+             placeholder="Re-enter password">
+    </div>
+    
+    <button type="submit" class="button primary">Create Admin Account</button>
+  </form>
+  
+  <div class="info-box" style="margin-top: 2rem;">
+    <h3>💡 Alternative Setup</h3>
+    <p>You can also configure admin credentials via environment variables:</p>
+    <pre style="background: #f5f5f5; padding: 1rem; border-radius: 4px;">
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=your-secure-password</pre>
+    <p><small>Restart the container after setting environment variables.</small></p>
+  </div>
+</div>
+
+<style>
+.info-box {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  background: #f9f9f9;
+}
+
+.error-message {
+  background: #fee;
+  border: 1px solid #fcc;
+  color: #c00;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.form-group small {
+  display: block;
+  color: #666;
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.button {
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.button.primary {
+  background: #007bff;
+  color: white;
+}
+
+.button.primary:hover {
+  background: #0056b3;
+}
+</style>
+{% endblock %}

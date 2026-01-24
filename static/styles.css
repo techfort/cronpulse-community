@@ -1,0 +1,159 @@
+body {
+    font-family: "Courier New", Consolas, monospace; /* Nerdy monospaced font */
+    margin: 20px; /* Reduced margin for spartan look */
+    line-height: 1.4; /* Tighter line spacing */
+    background-color: #1a1a1a; /* Dark background for tech vibe */
+    color: #d0d0d0; /* Light gray text for contrast */
+}
+
+h1, h2, h3 {
+    color: #00ff00; /* Green for a retro terminal feel */
+    font-weight: normal; /* Less bold for spartan aesthetic */
+}
+
+a {
+    color: #00ff7f; /* Brighter green for links */
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+    color: #00cc66; /* Darker green on hover */
+}
+
+.container {
+    max-width: 900px; /* Slightly wider for readability */
+    margin: 0 auto;
+    padding: 15px; /* Reduced padding */
+    background: #2a2a2a; /* Darker container for contrast */
+    border: 1px solid #333; /* Subtle border instead of shadow */
+    border-radius: 0; /* Remove rounded corners for spartan look */
+}
+
+form {
+    margin-top: 15px; /* Reduced margin */
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: normal; /* Less emphasis */
+}
+
+input[type="text"],
+input[type="password"],
+input[type="number"],
+input[type="datetime-local"] {
+    width: 100%;
+    padding: 6px; /* Reduced padding */
+    margin-bottom: 10px; /* Reduced margin */
+    border: 1px solid #444; /* Darker border */
+    border-radius: 0; /* Remove rounding */
+    background: #333; /* Dark input background */
+    color: #d0d0d0; /* Light text */
+    box-sizing: border-box;
+}
+
+button {
+    background-color: #00ff00; /* Green button for consistency */
+    color: #1a1a1a; /* Dark text on button */
+    padding: 8px 12px; /* Reduced padding */
+    border: none;
+    border-radius: 0; /* Remove rounding */
+    cursor: pointer;
+    font-family: inherit; /* Match body font */
+}
+
+button:hover {
+    background-color: #00cc66; /* Darker green on hover */
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    margin-bottom: 10px; /* Reduced margin */
+    padding: 8px; /* Reduced padding */
+    background: #333; /* Darker li background */
+    border: 1px solid #444; /* Subtle border */
+    border-radius: 0; /* Remove rounding */
+}
+
+.error {
+    color: #ff4444; /* Red for errors */
+    background: #2a1a1a; /* Dark red background */
+    padding: 8px; /* Reduced padding */
+    border: 1px solid #550000; /* Dark red border */
+    margin-bottom: 10px; /* Reduced margin */
+}
+
+.message {
+    color: #00ff00; /* Green for success */
+    background: #1a2a1a; /* Dark green background */
+    padding: 8px; /* Reduced padding */
+    border: 1px solid #005500; /* Dark green border */
+    margin-bottom: 10px; /* Reduced margin */
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 10px; /* Reduced padding */
+        margin: 5px; /* Reduced margin */
+    }
+    input, button {
+        font-size: 12px; /* Slightly smaller font */
+    }
+}
+
+.logo {
+    width: 120px; /* Reduced size for spartan look */
+    height: auto;
+    margin-bottom: 10px; /* Reduced margin */
+}
+
+.nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    background: #333; /* Darker nav background */
+    padding: 8px 0; /* Reduced padding */
+    border: 1px solid #444; /* Subtle border */
+    margin-bottom: 15px; /* Reduced margin */
+}
+
+.nav ul {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.nav li {
+    margin-right: 10px; /* Reduced spacing */
+}
+
+.nav a {
+    padding: 6px 12px; /* Adjusted padding */
+    color: #00ff7f; /* Green links */
+    text-decoration: none;
+    font-weight: normal; /* Less bold */
+    transition: color 0.2s; /* Smooth color transition */
+}
+
+.nav a:hover {
+    color: #00cc66; /* Darker green on hover */
+    background: transparent; /* Remove background for consistency */
+}
+
+/* Ensure logout link is styled as a nav item, not a button */
+.nav .logout {
+    padding: 6px 12px;
+    color: #ff4444; /* Red for logout to stand out */
+}
+
+.nav .logout:hover {
+    color: #cc0000; /* Darker red on hover */
+}

@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  cronpulse:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - cronpulse-data:/app/data
+    environment:
+      - DATABASE_URL=sqlite:///data/monitors.db
+      - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
+      - BREVO_API_KEY=${BREVO_API_KEY:-}
+      # Optional: Create admin user automatically on first startup
+      # If not set, you'll see a setup wizard on first visit
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-}
+    restart: unless-stopped
+
+volumes:
+  cronpulse-data:
+    driver: local

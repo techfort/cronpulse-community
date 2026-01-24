@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Choose a Plan</h1>
+<ul>
+  {% for plan in plans %}
+    <li>{{ plan.name }} - ${{ plan.price }}/month ({{ plan.monitor_limit }} monitors)
+      <form action="/subscribe/{{ plan.id }}" method="post">
+        <button type="submit">Subscribe</button>
+      </form>
+    </li>
+  {% endfor %}
+</ul>
+{% endblock %}

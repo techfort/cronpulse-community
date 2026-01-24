@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+sqlalchemy
+passlib[argon2]
+python-multipart
+jinja2
+python-dotenv
+requests
+apscheduler
+PyJWT
+flake8
+black
+pytest
+brevo-python
+email-validator

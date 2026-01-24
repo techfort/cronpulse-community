@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Documentation — CronPulse{% endblock %}
+
+{% block content %}
+<div class="container docs">
+  <h1>CronPulse — User Guide</h1>
+  <p>Simple, reliable monitoring for scheduled jobs. This guide explains the user-facing workflows — signing up, creating monitors, managing alerts, and handling API keys.</p>
+
+  <h2>Getting started</h2>
+  <ol>
+    <li>Create an account using the Sign Up page.</li>
+    <li>Log in with your email and password.</li>
+    <li>Visit the Dashboard to see your monitors and account information.</li>
+  </ol>
+
+  <h2>Dashboard overview</h2>
+  <p>The Dashboard shows a summary of your monitors, their status, last ping time, and next expected ping. Use the navigation to jump to full monitor management or API key management.</p>
+
+  <h2>Creating a monitor</h2>
+  <p>To add a monitor, provide:</p>
+  <ul>
+    <li><strong>Name</strong> — friendly label for the monitor.</li>
+    <li><strong>Interval</strong> — how often the job should run (minutes).</li>
+    <li><strong>Alert destination</strong> — at least one of an email address or a webhook URL where alerts will be sent.</li>
+    <li><strong>Expiration (optional)</strong> — an optional date/time when the monitor should stop generating alerts.</li>
+  </ul>
+  <p>After creation the monitor appears in your list. You can edit or delete it from the UI.</p>
+
+  <h2>Editing & deleting</h2>
+  <p>Edit a monitor to change interval or alert settings. Delete a monitor to stop monitoring permanently — deletions cannot be undone.</p>
+
+  <h2>Alerts & notifications</h2>
+  <p>When a monitor misses its expected ping, CronPulse will send alerts to the configured destinations. Ensure your email filters allow messages from the service and that webhook endpoints accept POST requests.</p>
+
+  <h2>API keys</h2>
+  <p>If you need programmatic access, create an API key from the API Keys page. Important notes:</p>
+  <ul>
+    <li>When a key is created the secret is shown once — copy and store it securely. It cannot be retrieved later.</li>
+    <li>Treat API keys like passwords. Do not share them publicly or check them into source control.</li>
+    <li>Rotate (delete and recreate) keys if you suspect they were exposed.</li>
+  </ul>
+
+  <h2>Best practices</h2>
+  <ul>
+    <li>Set alert destinations you monitor (email you check, or a webhook that your systems handle).</li>
+    <li>Choose conservative intervals (don't set overly frequent checks unless needed).</li>
+    <li>Keep API keys in a secure secrets manager or environment variable; rotate periodically.</li>
+  </ul>
+
+  <h2>Troubleshooting</h2>
+  <ul>
+    <li><strong>Can't log in:</strong> Try resetting your password from the login page. If problems persist, contact support.</li>
+    <li><strong>No alert emails:</strong> Check spam/junk folders and that the email address is correct.</li>
+    <li><strong>Webhook failures:</strong> Confirm your endpoint returns a 200/2xx response and is reachable from the service.</li>
+    <li><strong>Created API key not visible:</strong> The secret is shown only once. If lost, delete and recreate the key.</li>
+  </ul>
+
+  <h2>Contact & support</h2>
+  <p>For help, contact the service administrator or open a support request (details available in your account settings).</p>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+.container.docs { max-width: 900px; margin: 2rem auto; line-height: 1.5; }
+.muted { color:#888; font-size:0.9rem; }
+</style>
+{% endblock %}

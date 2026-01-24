@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+  <h1>API Keys</h1>
+
+  {% if error %}
+    <div class="error">{{ error }}</div>
+  {% endif %}
+
+  <form method="post" action="/api-keys/ui" hx-post="/api-keys/ui" hx-target="#api-key-list" hx-swap="outerHTML">
+    <label for="name">Key name</label>
+    <input id="name" name="name" required />
+    <button type="submit">Create API Key</button>
+  </form>
+
+  <hr/>
+
+  <div id="api-key-list">
+    {% include "partials/api_key_list.html" %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container">
+        <h2>Edit Monitor</h2>
+        <div id="edit-monitor-messages">
+            {% if error %}
+                <p class="error">{{ error }}</p>
+            {% endif %}
+        </div>
+        <form hx-post="/monitors/{{ monitor.id }}/edit/ui" hx-target="#edit-monitor-messages" hx-swap="innerHTML">
+            <label>Name: <input type="text" name="name" value="{{ monitor.name }}"></label>
+            <label>Interval (minutes): <input type="number" name="interval" step="1" value="{{ monitor.interval }}"></label>
+            <label>Email Recipient (optional): <input type="text" name="email_recipient" value="{{ monitor.email_recipient or '' }}"></label>
+            <label>Webhook URL (optional): <input type="text" name="webhook_url" value="{{ monitor.webhook_url or '' }}"></label>
+            <label>Expires At (optional): <input type="datetime-local" name="expires_at" value="{{ monitor.expires_at.isoformat().replace('+00:00', '') if monitor.expires_at else '' }}"></label>
+            <button type="submit">Update Monitor</button>
+        </form>
+        <p><a href="/monitors/ui">Back to Monitors</a></p>
+    </div>
+{% endblock %}

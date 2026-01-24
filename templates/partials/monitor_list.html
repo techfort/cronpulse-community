@@ -1,0 +1,13 @@
+<ul>
+{% for monitor in monitors %}
+    <li>
+        {{ monitor.name }} (Interval: {{ monitor.interval }} minutes, Last Ping: {{ monitor.last_ping or 'Never' }})
+        {% if monitor.expires_at and now > monitor.expires_at %}
+            [Expired]
+        {% else %}
+            [<a href="/monitors/{{ monitor.id }}/edit/ui">Edit</a>]
+            [<a hx-post="/monitors/{{ monitor.id }}/delete/ui" hx-target="#monitor-list" hx-swap="innerHTML">Delete</a>]
+        {% endif %}
+    </li>
+{% endfor %}
+</ul>

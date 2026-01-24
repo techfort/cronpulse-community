@@ -1,0 +1,18 @@
+<div id="api-key-list">
+  <ul>
+    {% for key in api_keys %}
+      <li>
+        <strong>{{ key.name or "Unnamed" }}</strong>
+        <small>{{ key.api_key }}</small>
+        <small>{{ key.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+
+        <form method="post" action="/api-keys/{{ key.id }}/delete/ui" style="display:inline"
+              hx-post="/api-keys/{{ key.id }}/delete/ui" hx-target="#api-key-list" hx-swap="outerHTML">
+          <button type="submit">Delete</button>
+        </form>
+      </li>
+    {% else %}
+      <li>No API keys yet.</li>
+    {% endfor %}
+  </ul>
+</div>

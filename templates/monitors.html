@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="container">
+        <h2>Your Monitors</h2>
+        <div id="monitor-messages">
+            {% if error %}
+                <p class="error">{{ error }}</p>
+            {% endif %}
+        </div>
+        <form id="monitor-form" hx-post="/monitors/ui" hx-target="#monitor-list" hx-swap="innerHTML" hx-indicator="#monitor-loading">
+            <label>Name: <input type="text" name="name" required></label>
+            <label>Interval (minutes): <input type="number" name="interval" step="0.1" required></label>
+            <label>Email Recipient (optional): <input type="text" name="email_recipient" id="email_recipient"></label>
+            <label>Webhook URL (optional): <input type="text" name="webhook_url" id="webhook_url"></label>
+            <label>Expires At (optional): <input type="datetime-local" name="expires_at"></label>
+            <button type="submit">Create Monitor</button>
+            <div id="monitor-loading" class="htmx-indicator">Loading...</div>
+        </form>
+        <div id="monitor-form-error"></div>
+        <script>
+        document.getElementById('monitor-form').addEventListener('submit', function(e) {
+            const email = document.getElementById('email_recipient').value.trim();
+            const webhook = document.getElementById('webhook_url').value.trim();
+            const errorDiv = document.getElementById('monitor-form-error');
+            errorDiv.innerHTML = '';
+            if (!email && !webhook) {
+                e.preventDefault();
+                errorDiv.innerHTML = '<p class="error">Please provide at least an Email Recipient or a Webhook URL.</p>';
+            }
+        });
+        </script>
+        <h3>Existing Monitors</h3>
+        <div id="monitor-list">
+            {% include 'partials/monitor_list.html' %}
+        </div>
+    </div>
+{% endblock %}

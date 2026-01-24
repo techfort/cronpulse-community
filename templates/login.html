@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log In - CronPulse</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>Log In</h2>
+        <div id="login-messages">
+            {% if error %}
+                <p class="error">{{ error }}</p>
+            {% endif %}
+            {% if message %}
+                <p class="message">{{ message }}</p>
+            {% endif %}
+        </div>
+        <form hx-post="/login/ui" hx-target="body" hx-swap="outerHTML">
+            <label>Email: <input type="text" name="email" required></label>
+            <label>Password: <input type="password" name="password" required></label>
+            <button type="submit">Log In</button>
+        </form>
+        <p><a href="/signup/ui">Need an account? Sign Up</a></p>
+    </div>
+</body>
+</html>
