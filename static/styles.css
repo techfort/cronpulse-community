@@ -157,3 +157,115 @@ li {
 .nav .logout:hover {
     color: #cc0000; /* Darker red on hover */
 }
+
+/* Modern list items with hover-reveal delete buttons */
+.item-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 12px;
+    background: #333;
+    border: 1px solid #444;
+    border-radius: 0;
+    transition: background 0.2s, border-color 0.2s;
+    position: relative;
+}
+
+.list-item:hover {
+    background: #3a3a3a;
+    border-color: #555;
+}
+
+.item-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.item-content strong {
+    color: #00ff00;
+    font-size: 1.1em;
+}
+
+.item-content small {
+    color: #999;
+    font-size: 0.85em;
+}
+
+.item-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.list-item:hover .item-actions {
+    opacity: 1;
+}
+
+.delete-form {
+    display: inline;
+    margin: 0;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.list-item:hover .delete-form {
+    opacity: 1;
+}
+
+.delete-btn {
+    background-color: transparent;
+    color: #ff4444;
+    border: 1px solid #ff4444;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.delete-btn:hover {
+    background-color: #ff4444;
+    color: #1a1a1a;
+    border-color: #ff4444;
+}
+
+.edit-btn {
+    background-color: transparent;
+    color: #00ff7f;
+    border: 1px solid #00ff7f;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 14px;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.2s;
+}
+
+.edit-btn:hover {
+    background-color: #00ff7f;
+    color: #1a1a1a;
+    border-color: #00ff7f;
+    text-decoration: none;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    font-size: 0.75em;
+    border-radius: 3px;
+}
+
+.status-badge.expired {
+    background: #550000;
+    color: #ff4444;
+    border: 1px solid #ff4444;
+}

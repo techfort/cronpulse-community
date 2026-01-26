@@ -178,6 +178,21 @@ class UserService:
         return count
 
     async def get_current_user_from_request(self, request: Request):
+        # First check for API key in headers
+        api_key = request.headers.get("X-API-Key") or request.headers.get("x-api-key")
+        if api_key:
+            logger.info("Attempting API key authentication")
+            try:
+                user_id = self.validate_api_key(api_key)
+                user = self.user_repo.get_user_by_id(user_id)
+                if user:
+                    logger.info(f"Successfully authenticated user {user_id} via API key")
+                    return user
+            except UserServiceException:
+                logger.error("Invalid API key provided")
+                raise UserServiceException("Invalid API key")
+        
+        # Fall back to JWT token authentication
         logger.info("Extracting token from request cookies")
         token = request.cookies.get("access_token")
         logger.info(
