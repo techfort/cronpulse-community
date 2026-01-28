@@ -98,6 +98,12 @@ CronPulse uses SMTP for sending email alerts. **Email is optional** - you can us
 - Create monitors with webhook URLs only
 - Configure email alerts later if needed
 
+**Configure Email Later:**
+If you skipped email during setup, you can add it anytime by:
+1. Stop the container: `docker compose down`
+2. Edit `.env` and add SMTP variables (see examples below)
+3. Restart: `docker compose up -d`
+
 **Configure Email (Optional):**
 
 **Gmail:**
