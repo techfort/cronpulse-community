@@ -36,6 +36,7 @@ async def setup_post(
     email: str = Form(...),
     password: str = Form(...),
     confirm_password: str = Form(...),
+    skip_email: Optional[str] = Form(None),
     smtp_host: Optional[str] = Form(None),
     smtp_port: Optional[str] = Form(None),
     smtp_user: Optional[str] = Form(None),
@@ -75,8 +76,8 @@ async def setup_post(
             user_repo = UserRepository(db)
             user_repo.update_user(user.id, {"is_admin": True})
             
-            # Save SMTP settings if provided
-            if smtp_host and smtp_port and smtp_user and smtp_password and sender_email:
+            # Save SMTP settings if provided and not skipped
+            if not skip_email and smtp_host and smtp_port and smtp_user and smtp_password and sender_email:
                 settings_repo = SettingsRepository(db)
                 settings_repo.set_setting("SMTP_HOST", smtp_host)
                 settings_repo.set_setting("SMTP_PORT", smtp_port)

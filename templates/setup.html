@@ -41,8 +41,17 @@
     <hr style="margin: 2rem 0;">
 
     <h3>📧 Email Alerts (Optional)</h3>
-    <p class="section-description">Configure SMTP to receive email alerts when monitors miss pings. You can skip this and configure it later.</p>
+    <p class="section-description">Configure SMTP to receive email alerts when monitors miss pings. You can skip this if you only plan to use webhooks.</p>
     
+    <div class="form-group">
+      <label>
+        <input type="checkbox" id="skip_email" name="skip_email" value="true">
+        Skip email configuration (I'll only use webhooks)
+      </label>
+      <small>You can always configure email alerts later</small>
+    </div>
+
+    <div id="smtp-fields">
     <div class="form-group">
       <label for="smtp_host">SMTP Host:</label>
       <input type="text" id="smtp_host" name="smtp_host" 
@@ -91,6 +100,7 @@
         Use TLS (recommended for port 587)
       </label>
     </div>
+    </div><!-- End smtp-fields -->
     
     <button type="submit" class="button primary">Complete Setup</button>
   </form>
@@ -204,5 +214,35 @@ SMTP_USE_TLS=true</pre>
 .button.primary:hover {
   background: #0056b3;
 }
+
+#smtp-fields {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background: #fafafa;
+  transition: opacity 0.3s ease;
+}
+
+#smtp-fields.hidden {
+  opacity: 0.3;
+  pointer-events: none;
+}
 </style>
+
+<script>
+// Toggle SMTP fields visibility when skip checkbox is changed
+document.getElementById('skip_email').addEventListener('change', function() {
+  const smtpFields = document.getElementById('smtp-fields');
+  if (this.checked) {
+    smtpFields.classList.add('hidden');
+    // Clear required attributes when skipping
+    smtpFields.querySelectorAll('input').forEach(input => {
+      input.removeAttribute('required');
+    });
+  } else {
+    smtpFields.classList.remove('hidden');
+  }
+});
+</script>
 {% endblock %}

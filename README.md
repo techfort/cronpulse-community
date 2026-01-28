@@ -91,7 +91,14 @@ uvicorn main:app --reload
 
 ### Email Setup
 
-CronPulse uses SMTP for sending email alerts. You can use any SMTP provider:
+CronPulse uses SMTP for sending email alerts. **Email is optional** - you can use webhook-only monitoring if preferred.
+
+**Skip Email Setup:**
+- During initial setup, check "Skip email configuration (I'll only use webhooks)"
+- Create monitors with webhook URLs only
+- Configure email alerts later if needed
+
+**Configure Email (Optional):**
 
 **Gmail:**
 1. Enable 2-factor authentication in your Google account
