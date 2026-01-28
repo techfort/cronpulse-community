@@ -7,13 +7,16 @@
   <h1>🔧 Welcome to CronPulse!</h1>
   <h2>Initial Setup</h2>
   
-  <p>No users exist yet. Let's create your admin account to get started.</p>
+  <p>Let's configure your CronPulse instance. You can change these settings later.</p>
   
   {% if error %}
   <div class="error-message">{{ error }}</div>
   {% endif %}
   
   <form method="POST" action="/setup">
+    <h3>👤 Admin Account</h3>
+    <p class="section-description">Create your administrator account</p>
+    
     <div class="form-group">
       <label for="email">Admin Email:</label>
       <input type="email" id="email" name="email" required 
@@ -34,26 +37,103 @@
       <input type="password" id="confirm_password" name="confirm_password" required 
              placeholder="Re-enter password">
     </div>
+
+    <hr style="margin: 2rem 0;">
+
+    <h3>📧 Email Alerts (Optional)</h3>
+    <p class="section-description">Configure SMTP to receive email alerts when monitors miss pings. You can skip this and configure it later.</p>
     
-    <button type="submit" class="button primary">Create Admin Account</button>
+    <div class="form-group">
+      <label for="smtp_host">SMTP Host:</label>
+      <input type="text" id="smtp_host" name="smtp_host" 
+             placeholder="smtp.gmail.com">
+      <small>Your email provider's SMTP server</small>
+    </div>
+
+    <div class="form-group">
+      <label for="smtp_port">SMTP Port:</label>
+      <input type="number" id="smtp_port" name="smtp_port" 
+             placeholder="587" value="587">
+      <small>Usually 587 (TLS) or 465 (SSL)</small>
+    </div>
+
+    <div class="form-group">
+      <label for="smtp_user">SMTP Username:</label>
+      <input type="text" id="smtp_user" name="smtp_user" 
+             placeholder="your-email@gmail.com">
+      <small>Your email address or SMTP username</small>
+    </div>
+
+    <div class="form-group">
+      <label for="smtp_password">SMTP Password:</label>
+      <input type="password" id="smtp_password" name="smtp_password" 
+             placeholder="App password or SMTP password">
+      <small>For Gmail, use an <a href="https://myaccount.google.com/apppasswords" target="_blank">App Password</a></small>
+    </div>
+
+    <div class="form-group">
+      <label for="sender_email">Sender Email:</label>
+      <input type="email" id="sender_email" name="sender_email" 
+             placeholder="noreply@yourdomain.com">
+      <small>Email address that alerts will be sent from</small>
+    </div>
+
+    <div class="form-group">
+      <label for="sender_name">Sender Name:</label>
+      <input type="text" id="sender_name" name="sender_name" 
+             placeholder="CronPulse" value="CronPulse">
+      <small>Display name for alert emails</small>
+    </div>
+
+    <div class="form-group">
+      <label>
+        <input type="checkbox" name="smtp_use_tls" value="true" checked>
+        Use TLS (recommended for port 587)
+      </label>
+    </div>
+    
+    <button type="submit" class="button primary">Complete Setup</button>
   </form>
   
   <div class="info-box" style="margin-top: 2rem;">
-    <h3>💡 Alternative Setup</h3>
-    <p>You can also configure admin credentials via environment variables:</p>
-    <pre style="background: #f5f5f5; padding: 1rem; border-radius: 4px;">
+    <h3>💡 Alternative: Environment Variables</h3>
+    <p>You can also configure these settings via environment variables in your <code>.env</code> file:</p>
+    <pre style="background: #f5f5f5; padding: 1rem; border-radius: 4px; font-size: 0.875rem;">
+# Admin Account
 ADMIN_EMAIL=admin@example.com
-ADMIN_PASSWORD=your-secure-password</pre>
-    <p><small>Restart the container after setting environment variables.</small></p>
+ADMIN_PASSWORD=your-secure-password
+
+# SMTP Settings
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+SENDER_EMAIL=your-email@gmail.com
+SENDER_NAME=CronPulse
+SMTP_USE_TLS=true</pre>
+    <p><small>Restart the container after setting environment variables. Environment variables take precedence over UI settings.</small></p>
   </div>
 </div>
 
 <style>
+.section-description {
+  color: #666;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
 .info-box {
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   padding: 1.5rem;
   background: #f9f9f9;
+}
+
+.info-box code {
+  background: #e8e8e8;
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.9rem;
 }
 
 .error-message {
@@ -75,7 +155,10 @@ ADMIN_PASSWORD=your-secure-password</pre>
   margin-bottom: 0.5rem;
 }
 
-.form-group input {
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"],
+.form-group input[type="number"] {
   width: 100%;
   padding: 0.75rem;
   border: 1px solid #ddd;
@@ -83,11 +166,24 @@ ADMIN_PASSWORD=your-secure-password</pre>
   font-size: 1rem;
 }
 
+.form-group input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
+
 .form-group small {
   display: block;
   color: #666;
   margin-top: 0.25rem;
   font-size: 0.875rem;
+}
+
+.form-group small a {
+  color: #0066cc;
+  text-decoration: none;
+}
+
+.form-group small a:hover {
+  text-decoration: underline;
 }
 
 .button {

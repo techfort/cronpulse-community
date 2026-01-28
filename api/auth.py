@@ -1,14 +1,19 @@
-from fastapi import APIRouter, Depends, Form, HTTPException
+from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from api.models import UserResponse
 from api.dependencies import get_user_service
 from api.services.user_service import UserService, UserServiceException
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 router = APIRouter()
+limiter = Limiter(key_func=get_remote_address)
 
 
 @router.post("/signup", response_model=UserResponse)
+@limiter.limit("5/hour")  # Strict limit for signup
 def signup(
+    request: Request,
     email: str = Form(...),
     password: str = Form(...),
     user_service: UserService = Depends(get_user_service),
@@ -21,7 +26,9 @@ def signup(
 
 
 @router.post("/login")
+@limiter.limit("10/minute")  # Prevent brute force
 def login(
+    request: Request,
     form_data: OAuth2PasswordRequestForm = Depends(),
     user_service: UserService = Depends(get_user_service),
 ):

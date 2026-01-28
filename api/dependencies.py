@@ -4,6 +4,7 @@ from db.engine import SessionLocal
 from sqlalchemy.orm import Session
 from db.repositories.monitor_repository import MonitorRepository
 from db.repositories.user_repository import UserRepository
+from db.repositories.settings_repository import SettingsRepository
 from api.services.monitor_service import MonitorService
 from api.services.user_service import UserService, UserServiceException
 
@@ -19,7 +20,8 @@ def get_db():
 def get_monitor_service(db: Session = Depends(get_db)):
     monitor_repo = MonitorRepository(db)
     user_repo = UserRepository(db)
-    return MonitorService(monitor_repo, user_repo)
+    settings_repo = SettingsRepository(db)
+    return MonitorService(monitor_repo, user_repo, settings_repo)
 
 
 def get_user_service(db: Session = Depends(get_db)):

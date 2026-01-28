@@ -9,8 +9,15 @@ services:
       - cronpulse-data:/app/data
     environment:
       - DATABASE_URL=sqlite:///data/monitors.db
-      - JWT_SECRET=${JWT_SECRET:-change-me-in-production}
-      - BREVO_API_KEY=${BREVO_API_KEY:-}
+      - JWT_SECRET=${JWT_SECRET:-}
+      # SMTP Configuration
+      - SMTP_HOST=${SMTP_HOST:-}
+      - SMTP_PORT=${SMTP_PORT:-}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-}
+      - SENDER_EMAIL=${SENDER_EMAIL:-}
+      - SENDER_NAME=${SENDER_NAME:-CronPulse}
+      - SMTP_USE_TLS=${SMTP_USE_TLS:-true}
       # Optional: Create admin user automatically on first startup
       # If not set, you'll see a setup wizard on first visit
       - ADMIN_EMAIL=${ADMIN_EMAIL:-}

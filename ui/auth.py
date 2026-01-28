@@ -4,7 +4,9 @@ from .utils import render_template
 from api.services.user_service import UserService, UserServiceException
 from api.dependencies import get_user_service
 from db.repositories.user_repository import UserRepository
+from db.repositories.settings_repository import SettingsRepository
 from db.engine import SessionLocal
+from typing import Optional
 
 router = APIRouter()
 
@@ -34,6 +36,13 @@ async def setup_post(
     email: str = Form(...),
     password: str = Form(...),
     confirm_password: str = Form(...),
+    smtp_host: Optional[str] = Form(None),
+    smtp_port: Optional[str] = Form(None),
+    smtp_user: Optional[str] = Form(None),
+    smtp_password: Optional[str] = Form(None),
+    sender_email: Optional[str] = Form(None),
+    sender_name: Optional[str] = Form(None),
+    smtp_use_tls: Optional[str] = Form(None),
     user_service: UserService = Depends(get_user_service),
 ):
     """Process first-run setup"""
@@ -57,14 +66,25 @@ async def setup_post(
         )
     
     try:
-        # Create admin user
-        user = user_service.signup(email, password)
-        
-        # Mark as admin
         db = SessionLocal()
         try:
+            # Create admin user
+            user = user_service.signup(email, password)
+            
+            # Mark as admin
             user_repo = UserRepository(db)
             user_repo.update_user(user.id, {"is_admin": True})
+            
+            # Save SMTP settings if provided
+            if smtp_host and smtp_port and smtp_user and smtp_password and sender_email:
+                settings_repo = SettingsRepository(db)
+                settings_repo.set_setting("SMTP_HOST", smtp_host)
+                settings_repo.set_setting("SMTP_PORT", smtp_port)
+                settings_repo.set_setting("SMTP_USER", smtp_user)
+                settings_repo.set_setting("SMTP_PASSWORD", smtp_password, is_secret=True)
+                settings_repo.set_setting("SENDER_EMAIL", sender_email)
+                settings_repo.set_setting("SENDER_NAME", sender_name or "CronPulse")
+                settings_repo.set_setting("SMTP_USE_TLS", "true" if smtp_use_tls else "false")
         finally:
             db.close()
         

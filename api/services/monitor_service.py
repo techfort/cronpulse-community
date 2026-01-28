@@ -1,11 +1,13 @@
 from db.repositories.monitor_repository import MonitorRepository
 from db.repositories.user_repository import UserRepository
+from db.repositories.settings_repository import SettingsRepository
 from db.models import Monitor
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Union
 import os
 import requests
 import logging
+from api.services.email_service import EmailService
 
 logger = logging.getLogger(__name__)
 
@@ -61,11 +63,41 @@ def _parse_datetime(value: Union[str, datetime, None]) -> Optional[datetime]:
 
 
 class MonitorService:
-    def __init__(self, monitor_repo: MonitorRepository, user_repo: UserRepository):
+    def __init__(self, monitor_repo: MonitorRepository, user_repo: UserRepository, settings_repo: Optional[SettingsRepository] = None):
         self.monitor_repo = monitor_repo
         self.user_repo = user_repo
-        self.mailgun_api_key = os.getenv("MAILGUN_API_KEY")
-        self.mailgun_domain = os.getenv("MAILGUN_DOMAIN")
+        self.settings_repo = settings_repo
+        
+        # Initialize EmailService if SMTP is configured
+        self.email_service = None
+        self._init_email_service()
+    
+    def _init_email_service(self):
+        """Initialize email service from settings (env vars or database)"""
+        # Helper to get setting value
+        def get_setting(key: str) -> Optional[str]:
+            if self.settings_repo:
+                return self.settings_repo.get_setting(key)
+            return os.getenv(key)
+        
+        smtp_config = {
+            "SMTP_HOST": get_setting("SMTP_HOST"),
+            "SMTP_PORT": get_setting("SMTP_PORT"),
+            "SMTP_USER": get_setting("SMTP_USER"),
+            "SMTP_PASSWORD": get_setting("SMTP_PASSWORD"),
+            "SENDER_EMAIL": get_setting("SENDER_EMAIL"),
+            "SENDER_NAME": get_setting("SENDER_NAME") or "CronPulse",
+            "SMTP_USE_TLS": get_setting("SMTP_USE_TLS") or "true",
+        }
+        
+        if all(smtp_config.get(k) for k in ["SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASSWORD", "SENDER_EMAIL"]):
+            try:
+                self.email_service = EmailService(smtp_config)
+                logger.info("Email service initialized successfully")
+            except Exception as e:
+                logger.warning(f"Failed to initialize email service: {e}")
+        else:
+            logger.info("SMTP not configured, email alerts disabled")
 
     def create_monitor(
         self,
@@ -164,30 +196,48 @@ class MonitorService:
         if monitor.expires_at and datetime.utcnow() > monitor.expires_at:
             logger.info(f"Skipping email alert for expired monitor {monitor.name}")
             return
-        if not self.mailgun_api_key or not self.mailgun_domain:
-            logger.warning("Mailgun configuration missing, skipping email alert")
+        
+        if not self.email_service:
+            logger.warning("Email service not configured, skipping email alert")
             return
-        response = requests.post(
-            f"https://api.mailgun.net/v3/{self.mailgun_domain}/messages",
-            auth=("api", self.mailgun_api_key),
-            data={
-                "from": f"no-reply@{self.mailgun_domain}",
-                "to": monitor.email_recipient,
-                "subject": (f"Alert: Monitor {monitor.name} missed ping"),
-                "text": (
-                    f"The monitor '{monitor.name}' has not received a ping within the "
-                    f"expected interval of {monitor.interval} minutes."
-                ),
-            },
+        
+        if not monitor.email_recipient:
+            logger.warning(f"No email recipient configured for monitor {monitor.name}")
+            return
+        
+        subject = f"⚠️ CronPulse Alert: {monitor.name} missed ping"
+        html_content = f"""
+        <h2>⚠️ Monitor Alert</h2>
+        <p>The monitor <strong>{monitor.name}</strong> has not received a ping within the expected interval.</p>
+        
+        <h3>Details:</h3>
+        <ul>
+            <li><strong>Monitor:</strong> {monitor.name}</li>
+            <li><strong>Expected Interval:</strong> {monitor.interval} minutes</li>
+            <li><strong>Last Ping:</strong> {monitor.last_ping.isoformat() if monitor.last_ping else 'Never'}</li>
+            <li><strong>Alert Time:</strong> {datetime.utcnow().isoformat()}</li>
+        </ul>
+        
+        <p>Please check your cron job or scheduled task to ensure it's running correctly.</p>
+        
+        <hr>
+        <p style="color: #666; font-size: 12px;">
+            This alert was sent by CronPulse Community Edition. 
+            <a href="http://localhost:8000/monitors">View Monitor</a>
+        </p>
+        """
+        
+        success, message = self.email_service.send_alert(
+            to_email=monitor.email_recipient,
+            to_name=monitor.email_recipient,
+            subject=subject,
+            html_content=html_content,
         )
-        if response.status_code == 200:
-            logger.info(f"Email alert sent for monitor {monitor.name}")
+        
+        if success:
+            logger.info(f"Email alert sent successfully for monitor {monitor.name}")
         else:
-            logger.error(
-                "Failed to send email alert for monitor %s: %s",
-                monitor.name,
-                response.text,
-            )
+            logger.error(f"Failed to send email alert for monitor {monitor.name}: {message}")
 
     def send_webhook_alert(self, monitor: Monitor) -> None:
         if monitor.expires_at and datetime.utcnow() > monitor.expires_at:

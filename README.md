@@ -81,15 +81,39 @@ uvicorn main:app --reload
 |----------|-------------|---------|
 | `DATABASE_URL` | SQLite database path | `sqlite:///data/monitors.db` |
 | `JWT_SECRET` | Secret key for JWT tokens | Required |
-| `BREVO_API_KEY` | API key for email alerts | Optional |
+| `SMTP_HOST` | SMTP server hostname | Optional |
+| `SMTP_PORT` | SMTP server port (587 or 465) | Optional |
+| `SMTP_USER` | SMTP username | Optional |
+| `SMTP_PASSWORD` | SMTP password | Optional |
+| `SENDER_EMAIL` | Email sender address | Optional |
+| `SENDER_NAME` | Email sender name | Optional |
+| `SMTP_USE_TLS` | Use TLS for SMTP (true/false) | `true` |
 
 ### Email Setup
 
-CronPulse uses [Brevo](https://www.brevo.com/) (formerly Sendinblue) for sending email alerts:
+CronPulse uses SMTP for sending email alerts. You can use any SMTP provider:
 
-1. Sign up for a free Brevo account
-2. Get your API key from account settings
-3. Set the `BREVO_API_KEY` environment variable
+**Gmail:**
+1. Enable 2-factor authentication in your Google account
+2. Create an [App Password](https://myaccount.google.com/apppasswords)
+3. Configure environment variables:
+   ```bash
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=587
+   SMTP_USER=your-email@gmail.com
+   SMTP_PASSWORD=your-app-password
+   SENDER_EMAIL=your-email@gmail.com
+   SENDER_NAME=CronPulse
+   ```
+
+**SendGrid, Mailgun, AWS SES:**
+Configure with your provider's SMTP credentials. Most support standard SMTP on ports 587 (TLS) or 465 (SSL).
+
+**Test your configuration:**
+```bash
+# Set your SMTP environment variables in .env first
+python test_email.py your-email@example.com
+```
 
 ## Usage
 
@@ -178,6 +202,35 @@ cronpulse-community/
 ├── main.py           # Application entry point
 └── docker-compose.yml
 ```
+
+## Security
+
+CronPulse Community Edition includes enterprise-grade security features:
+
+- **🔒 Password Hashing**: Argon2id algorithm
+- **🛡️ Rate Limiting**: Protection against brute force attacks
+- **✅ Input Validation**: XSS and injection prevention
+- **🔐 JWT Authentication**: Secure session management
+- **📝 Security Headers**: HSTS, CSP, X-Frame-Options
+- **🔑 Secure Secrets**: Auto-generated JWT secrets if not provided
+
+### Production Security Checklist
+
+```bash
+# 1. Generate secure JWT secret
+openssl rand -hex 32 > .jwt_secret
+export JWT_SECRET=$(cat .jwt_secret)
+
+# 2. Enable HTTPS (use reverse proxy)
+# Configure nginx/Caddy with Let's Encrypt
+
+# 3. Restrict CORS
+export CORS_ORIGINS=https://yourdomain.com
+
+# 4. Review SECURITY.md for detailed guidance
+```
+
+**For detailed security information, see [SECURITY.md](SECURITY.md)**
 
 ## Troubleshooting
 

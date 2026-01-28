@@ -11,5 +11,5 @@ PyJWT
 flake8
 black
 pytest
-brevo-python
 email-validator
+slowapi

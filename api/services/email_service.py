@@ -1,10 +1,16 @@
-import brevo_python
-from brevo_python.rest import ApiException
+import smtplib
+import ssl
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class EmailService:
     """
-    A service to send transactional emails using the Brevo (formerly Sendinblue) API.
+    A service to send transactional emails using SMTP.
+    Supports any SMTP server (Gmail, SendGrid, Mailgun, AWS SES, etc.)
     """
 
     def __init__(self, config: dict):
@@ -14,34 +20,34 @@ class EmailService:
         Args:
             config (dict): A dictionary containing configuration parameters.
                            Expected keys:
-                           - 'BREVO_API_KEY': Your Brevo API key.
-                           - 'SENDER_EMAIL': The default sender's email address.
-                           - 'SENDER_NAME': The default sender's name.
+                           - 'SMTP_HOST': SMTP server hostname (e.g., smtp.gmail.com)
+                           - 'SMTP_PORT': SMTP server port (e.g., 587 for TLS, 465 for SSL)
+                           - 'SMTP_USER': SMTP username/email
+                           - 'SMTP_PASSWORD': SMTP password or app password
+                           - 'SENDER_EMAIL': The sender's email address
+                           - 'SENDER_NAME': The sender's name
+                           - 'SMTP_USE_TLS': Whether to use TLS (default: True)
         """
-        if not all(
-            k in config for k in ["BREVO_API_KEY", "SENDER_EMAIL", "SENDER_NAME"]
-        ):
+        required_keys = ["SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASSWORD", "SENDER_EMAIL", "SENDER_NAME"]
+        if not all(k in config for k in required_keys):
             raise ValueError(
-                "Config must contain BREVO_API_KEY, SENDER_EMAIL, and SENDER_NAME"
+                f"Config must contain: {', '.join(required_keys)}"
             )
 
         self.config = config
-        self.sender_email = self.config["SENDER_EMAIL"]
-        self.sender_name = self.config["SENDER_NAME"]
-
-        # Configure API key authorization: api-key
-        brevo_config = brevo_python.Configuration()
-        brevo_config.api_key["api-key"] = self.config["BREVO_API_KEY"]
-
-        # Create an instance of the API class
-        api_client = brevo_python.ApiClient(brevo_config)
-        self.api_instance = brevo_python.TransactionalEmailsApi(api_client)
+        self.smtp_host = config["SMTP_HOST"]
+        self.smtp_port = int(config["SMTP_PORT"])
+        self.smtp_user = config["SMTP_USER"]
+        self.smtp_password = config["SMTP_PASSWORD"]
+        self.sender_email = config["SENDER_EMAIL"]
+        self.sender_name = config["SENDER_NAME"]
+        self.use_tls = config.get("SMTP_USE_TLS", "true").lower() == "true"
 
     def send_alert(
         self, to_email: str, to_name: str, subject: str, html_content: str
     ) -> tuple[bool, str]:
         """
-        Sends an email alert.
+        Sends an email alert via SMTP.
 
         Args:
             to_email (str): The recipient's email address.
@@ -51,24 +57,47 @@ class EmailService:
 
         Returns:
             tuple[bool, str]: A tuple containing a boolean indicating success
-                              and a message (message_id on success, error on failure).
+                              and a message ("sent" on success, error on failure).
         """
-        sender = brevo_python.SendSmtpEmailSender(
-            name=self.sender_name, email=self.sender_email
-        )
-        to = [brevo_python.SendSmtpEmailTo(email=to_email, name=to_name)]
-
-        send_smtp_email = brevo_python.SendSmtpEmail(
-            sender=sender, to=to, html_content=html_content, subject=subject
-        )
-
         try:
-            api_response = self.api_instance.send_transac_email(send_smtp_email)
-            return True, api_response.message_id
-        except ApiException as e:
-            # It's recommended to log the full error `e` in a real application
-            error_message = (
-                "Exception when calling "
-                f"TransactionalEmailsApi->send_transac_email: {e.reason}"
-            )
+            # Create message
+            message = MIMEMultipart("alternative")
+            message["Subject"] = subject
+            message["From"] = f"{self.sender_name} <{self.sender_email}>"
+            message["To"] = to_email
+
+            # Add HTML content
+            html_part = MIMEText(html_content, "html")
+            message.attach(html_part)
+
+            # Create secure connection and send
+            context = ssl.create_default_context()
+            
+            if self.smtp_port == 465:
+                # SSL connection
+                with smtplib.SMTP_SSL(self.smtp_host, self.smtp_port, context=context) as server:
+                    server.login(self.smtp_user, self.smtp_password)
+                    server.send_message(message)
+            else:
+                # TLS connection (port 587)
+                with smtplib.SMTP(self.smtp_host, self.smtp_port) as server:
+                    if self.use_tls:
+                        server.starttls(context=context)
+                    server.login(self.smtp_user, self.smtp_password)
+                    server.send_message(message)
+            
+            logger.info(f"Email sent successfully to {to_email}")
+            return True, "sent"
+            
+        except smtplib.SMTPAuthenticationError as e:
+            error_message = f"SMTP authentication failed: {str(e)}"
+            logger.error(error_message)
+            return False, error_message
+        except smtplib.SMTPException as e:
+            error_message = f"SMTP error: {str(e)}"
+            logger.error(error_message)
+            return False, error_message
+        except Exception as e:
+            error_message = f"Failed to send email: {str(e)}"
+            logger.exception(error_message)
             return False, error_message
