@@ -158,6 +158,7 @@ Full API documentation is available at http://localhost:8000/documentation after
 
 ### Key Endpoints
 
+- `GET /health` - Health check for monitoring
 - `POST /api/auth/signup` - Create new account
 - `POST /api/auth/login` - Login
 - `GET /api/monitors` - List monitors

@@ -5,6 +5,7 @@ from fastapi.concurrency import asynccontextmanager
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from api import router as api_router
+from api.health import router as health_router
 from api.services.monitor_service import MonitorService
 from api.services.user_service import UserService
 from db.engine import SessionLocal
@@ -143,6 +144,7 @@ async def add_security_headers(request: Request, call_next):
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     return response
 
+app.include_router(health_router)
 app.include_router(api_router, prefix="/api")
 app.include_router(ui_router)
 app.mount("/static", StaticFiles(directory="static"), name="static")
