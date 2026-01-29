@@ -25,6 +25,20 @@ A lightweight, self-hosted monitoring solution for your background jobs, schedul
 - 🐳 **Docker Ready**: Single-container deployment with persistent storage
 - 🆓 **Open Source**: No subscriptions, no limits, fully self-hosted
 
+## Screenshots
+
+### Dashboard
+![Dashboard](docs/images/dashboard.png)
+*Monitor overview showing status and last ping times*
+
+### Creating a Monitor
+![Create Monitor](docs/images/create-monitor.png)
+*Simple form to set up monitoring for your cron jobs*
+
+### API Keys Management
+![API Keys](docs/images/api-keys.png)
+*Generate API keys for programmatic access*
+
 ## Quick Start with Docker
 
 ### Using Docker Compose (Recommended)
