@@ -13,3 +13,4 @@ black
 pytest
 email-validator
 slowapi
+alembic

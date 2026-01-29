@@ -2,43 +2,6 @@
 Integration tests for monitor endpoints
 """
 import pytest
-from fastapi.testclient import TestClient
-from main import app
-from db.base import Base
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-
-
-# Create test database
-TEST_DATABASE_URL = "sqlite:///:memory:"
-test_engine = create_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False})
-TestSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
-
-
-def override_get_db():
-    db = TestSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-
-@pytest.fixture(scope="function")
-def test_db():
-    """Create a fresh database for each test"""
-    Base.metadata.create_all(bind=test_engine)
-    yield
-    Base.metadata.drop_all(bind=test_engine)
-
-
-@pytest.fixture
-def client(test_db):
-    """Create a test client with overridden database"""
-    from api.dependencies import get_db
-    app.dependency_overrides[get_db] = override_get_db
-    with TestClient(app) as test_client:
-        yield test_client
-    app.dependency_overrides.clear()
 
 
 @pytest.fixture

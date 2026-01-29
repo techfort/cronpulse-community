@@ -100,10 +100,16 @@ async def lifespan(app: FastAPI):
     # Startup code
     ensure_jwt_secret()
     initialize_admin_user()
-    start_scheduler()
+    # Skip scheduler in tests
+    if os.getenv("SKIP_SCHEDULER") != "true":
+        start_scheduler()
     yield
-    # Shutdown code (if needed)
-    # scheduler.shutdown()  # if you want to stop the scheduler gracefully
+    # Shutdown code - gracefully stop the scheduler
+    global scheduler
+    if scheduler and os.getenv("SKIP_SCHEDULER") != "true":
+        print("Shutting down scheduler...")
+        scheduler.shutdown(wait=True)  # Wait for running jobs to complete
+        print("Scheduler stopped gracefully")
 
 
 app = FastAPI(lifespan=lifespan)

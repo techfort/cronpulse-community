@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - CronPulse{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h1>⚙️ Settings</h1>
+  
+  {% if success %}
+  <div class="success-message">{{ success }}</div>
+  {% endif %}
+  
+  {% if error %}
+  <div class="error-message">{{ error }}</div>
+  {% endif %}
+  
+  <div class="settings-section">
+    <h2>📧 Email Configuration</h2>
+    
+    {% if email_configured %}
+    <div class="status-badge status-active">
+      ✅ Email alerts are enabled
+    </div>
+    {% else %}
+    <div class="status-badge status-inactive">
+      ⚠️ Email alerts are not configured
+    </div>
+    <p class="help-text">Configure SMTP settings below to enable email alerts for your monitors.</p>
+    {% endif %}
+    
+    <form method="POST" action="/settings/smtp" class="settings-form">
+      <div class="form-group">
+        <label for="smtp_host">SMTP Host:</label>
+        <input type="text" id="smtp_host" name="smtp_host" 
+               value="{{ smtp_settings.smtp_host }}"
+               placeholder="smtp.gmail.com" required>
+        <small>Your email provider's SMTP server</small>
+      </div>
+      
+      <div class="form-group">
+        <label for="smtp_port">SMTP Port:</label>
+        <input type="number" id="smtp_port" name="smtp_port" 
+               value="{{ smtp_settings.smtp_port }}"
+               placeholder="587" required>
+        <small>Usually 587 (TLS) or 465 (SSL)</small>
+      </div>
+      
+      <div class="form-group">
+        <label for="smtp_user">SMTP Username:</label>
+        <input type="text" id="smtp_user" name="smtp_user" 
+               value="{{ smtp_settings.smtp_user }}"
+               placeholder="your-email@gmail.com" required>
+        <small>Your email address or SMTP username</small>
+      </div>
+      
+      <div class="form-group">
+        <label for="smtp_password">SMTP Password:</label>
+        <input type="password" id="smtp_password" name="smtp_password" 
+               placeholder="Leave blank to keep current password">
+        <small>For Gmail, use an <a href="https://myaccount.google.com/apppasswords" target="_blank">App Password</a></small>
+      </div>
+      
+      <div class="form-group">
+        <label for="sender_email">Sender Email:</label>
+        <input type="email" id="sender_email" name="sender_email" 
+               value="{{ smtp_settings.sender_email }}"
+               placeholder="noreply@yourdomain.com" required>
+        <small>Email address that alerts will be sent from</small>
+      </div>
+      
+      <div class="form-group">
+        <label for="sender_name">Sender Name:</label>
+        <input type="text" id="sender_name" name="sender_name" 
+               value="{{ smtp_settings.sender_name }}"
+               placeholder="CronPulse">
+        <small>Display name for alert emails</small>
+      </div>
+      
+      <div class="form-group">
+        <label>
+          <input type="checkbox" name="smtp_use_tls" value="true" 
+                 {% if smtp_settings.smtp_use_tls == "true" %}checked{% endif %}>
+          Use TLS (recommended for port 587)
+        </label>
+      </div>
+      
+      <div class="button-group">
+        <button type="submit" class="button primary">Save Settings</button>
+      </div>
+    </form>
+  </div>
+  
+  {% if email_configured %}
+  <div class="settings-section">
+    <h2>📤 Test Email Configuration</h2>
+    <p class="help-text">Send a test email to verify your SMTP settings are working correctly.</p>
+    
+    <form method="POST" action="/settings/test-email" class="settings-form">
+      <div class="form-group">
+        <label for="test_email_address">Test Email Address:</label>
+        <input type="email" id="test_email_address" name="test_email_address" 
+               value="{{ current_user.email }}"
+               placeholder="your-email@example.com" required>
+        <small>We'll send a test email to this address</small>
+      </div>
+      
+      <div class="button-group">
+        <button type="submit" class="button secondary">Send Test Email</button>
+      </div>
+    </form>
+  </div>
+  {% endif %}
+  
+  <div class="info-box">
+    <h3>💡 Note</h3>
+    <p>Changes take effect immediately for new monitors. Existing monitors will use the updated settings on their next check.</p>
+    <p>If you prefer to use environment variables instead, you can set them in your <code>.env</code> file. Environment variables take precedence over database settings.</p>
+  </div>
+</div>
+
+<style>
+.settings-section {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+}
+
+.settings-section h2 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.status-active {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.status-inactive {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
+.settings-form {
+  margin-top: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="password"],
+.form-group input[type="number"] {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.form-group input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
+
+.form-group small {
+  display: block;
+  color: #666;
+  margin-top: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.form-group small a {
+  color: #0066cc;
+  text-decoration: none;
+}
+
+.form-group small a:hover {
+  text-decoration: underline;
+}
+
+.button-group {
+  margin-top: 1.5rem;
+}
+
+.button {
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  margin-right: 1rem;
+}
+
+.button.primary {
+  background: #007bff;
+  color: white;
+}
+
+.button.primary:hover {
+  background: #0056b3;
+}
+
+.button.secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.button.secondary:hover {
+  background: #545b62;
+}
+
+.success-message {
+  background: #d4edda;
+  border: 1px solid #c3e6cb;
+  color: #155724;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+}
+
+.error-message {
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+}
+
+.help-text {
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.info-box {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  background: #f9f9f9;
+  margin-top: 2rem;
+}
+
+.info-box h3 {
+  margin-top: 0;
+}
+
+.info-box code {
+  background: #e8e8e8;
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.9rem;
+}
+</style>
+{% endblock %}
