@@ -4,6 +4,8 @@
 
 A lightweight, self-hosted monitoring solution for your background jobs, scheduled tasks, and automated services. Get instant alerts via email or webhooks when your critical processes fail to check in.
 
+> 💼 Looking for managed hosting? Check out [CronPulse Pro](https://cronpulse.dev) for a fully hosted solution with additional features.
+
 ## Why CronPulse?
 
 **Use Cases:**
@@ -474,6 +476,16 @@ This is the community edition of CronPulse. Contributions are welcome!
 ## License
 
 MIT License - see [LICENSE](LICENSE) file for details
+
+## CronPulse Pro
+
+Looking for a managed, hassle-free solution? [CronPulse Pro](https://cronpulse.dev) offers:
+- Fully managed hosting — no servers to maintain
+- Additional enterprise features
+- Priority support
+- Team collaboration tools
+
+This community edition will always remain free and open source.
 
 ## Support
 
