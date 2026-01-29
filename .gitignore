@@ -62,3 +62,20 @@ Thumbs.db
 *.bak
 *.old
 README.old.md
+
+# Personal/Development scripts
+test_email.py
+setup_dev.sh
+restart.sh
+backup.sh
+verify-deployment.sh
+
+# AWS/Deployment specific
+aws-task-definition.json
+deploy-aws.sh
+DEPLOYMENT.md
+fly.toml
+
+# Internal documentation
+MIGRATIONS.md
+E2E_TEST_SUMMARY.md

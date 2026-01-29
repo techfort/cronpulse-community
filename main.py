@@ -22,8 +22,11 @@ from ui.utils import render_template
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    filename="log.txt",
     format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[
+        logging.FileHandler("log.txt"),
+        logging.StreamHandler()  # Also log to stdout for Docker
+    ]
 )
 logger = logging.getLogger(__name__)
 
@@ -214,6 +217,21 @@ def start_scheduler():
 async def http_exception_handler(request: Request, exc: HTTPException):
     context = {"error": exc.detail, "status_code": exc.status_code}
     return render_template(request, "error.html", context, status_code=exc.status_code)
+
+
+@app.exception_handler(Exception)
+async def general_exception_handler(request: Request, exc: Exception):
+    """Catch all unhandled exceptions and log them"""
+    import traceback
+    import sys
+    error_msg = f"Unhandled exception on {request.url}: {exc}\n{traceback.format_exc()}"
+    logger.error(error_msg)
+    print(error_msg, file=sys.stderr, flush=True)
+    from fastapi.responses import JSONResponse
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal Server Error"}
+    )
 
 
 print(app.routes)

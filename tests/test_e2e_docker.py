@@ -4,9 +4,13 @@ End-to-end tests using Testcontainers with the published Docker image
 import pytest
 import httpx
 import time
+import uuid
+from datetime import datetime, timezone
+from passlib.context import CryptContext
 from testcontainers.core.container import DockerContainer
 from testcontainers.core.network import Network
 from testcontainers.postgres import PostgresContainer
+import psycopg2
 
 
 @pytest.fixture(scope="module")
@@ -75,7 +79,62 @@ def app_container(postgres_container, test_network):
                     print(f"Still waiting... attempt {i}/{max_retries}")
                 time.sleep(2)
         
-        yield base_url
+        # Return both URL and container for log access
+        yield {"url": base_url, "container": container}
+
+
+@pytest.fixture(scope="function")
+def api_key_fixture(postgres_container):
+    """
+    Create a user and API key directly in the database for testing.
+    Returns tuple of (email, password, api_key)
+    """
+    # Connect to the database
+    conn = psycopg2.connect(
+        host=postgres_container.get_container_host_ip(),
+        port=postgres_container.get_exposed_port(5432),
+        user="test",
+        password="test",
+        database="test"
+    )
+    cursor = conn.cursor()
+    
+    try:
+        # Create password hash
+        pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
+        email = "apitest@example.com"
+        password = "TestPass123!"
+        password_hash = pwd_context.hash(password)
+        
+        # Insert user with all required fields and defaults
+        cursor.execute(
+            """INSERT INTO users (email, hashed_password, is_admin) 
+               VALUES (%s, %s, %s) RETURNING id""",
+            (email, password_hash, False)
+        )
+        user_id = cursor.fetchone()[0]
+        
+        # Create API key
+        api_key = str(uuid.uuid4())
+        key_hash = pwd_context.hash(api_key)
+        
+        cursor.execute(
+            "INSERT INTO api_keys (user_id, api_key, key_hash, name, created_at) VALUES (%s, %s, %s, %s, %s)",
+            (user_id, api_key, key_hash, "Test API Key", datetime.now(timezone.utc))
+        )
+        
+        conn.commit()
+        
+        yield (email, password, api_key)
+        
+    finally:
+        # Cleanup - delete monitors first due to foreign key constraint
+        cursor.execute("DELETE FROM monitors WHERE user_id IN (SELECT id FROM users WHERE email = %s)", (email,))
+        cursor.execute("DELETE FROM api_keys WHERE user_id IN (SELECT id FROM users WHERE email = %s)", (email,))
+        cursor.execute("DELETE FROM users WHERE email = %s", (email,))
+        conn.commit()
+        cursor.close()
+        conn.close()
 
 
 class TestE2EDockerWorkflow:
@@ -85,7 +144,7 @@ class TestE2EDockerWorkflow:
         """
         Complete workflow: create user, login, create monitor, ping it, delete it
         """
-        base_url = app_container
+        base_url = app_container["url"]
         
         # Step 1: Create a user account
         signup_response = httpx.post(
@@ -177,7 +236,7 @@ class TestE2EDockerWorkflow:
         """
         Test that ping endpoint works with authentication
         """
-        base_url = app_container
+        base_url = app_container["url"]
         
         # Create user and monitor first
         signup_response = httpx.post(
@@ -223,47 +282,27 @@ class TestE2EDockerWorkflow:
         assert ping_response.json()["status"] == "success"
     
     
-    @pytest.mark.skip(reason="API key creation endpoint doesn't return the key field - API bug")
-    def test_api_key_workflow(self, app_container):
+    def test_api_key_workflow(self, app_container, api_key_fixture):
         """
         Test creating and using API keys
         """
-        base_url = app_container
+        base_url = app_container["url"]
+        container = app_container["container"]
+        email, password, api_key = api_key_fixture
         
-        # Setup: Create user and login
-        httpx.post(
-            f"{base_url}/api/signup",
-            data={
-                "email": "apikey@example.com",
-                "password": "SecurePass123!",
-            },
+        # First, test listing monitors with API key (simpler operation)
+        api_headers = {"X-API-Key": api_key}
+        list_response = httpx.get(
+            f"{base_url}/api/monitors",
+            headers=api_headers,
             timeout=10
         )
-        
-        login_response = httpx.post(
-            f"{base_url}/api/login",
-            data={
-                "username": "apikey@example.com",
-                "password": "SecurePass123!"
-            },
-            timeout=10
-        )
-        access_token = login_response.json()["access_token"]
-        headers = {"Authorization": f"Bearer {access_token}"}
-        
-        # Create an API key
-        create_key_response = httpx.post(
-            f"{base_url}/api/api-keys",
-            data={"name": "Test API Key"},
-            headers=headers,
-            timeout=10
-        )
-        assert create_key_response.status_code == 200
-        api_key_data = create_key_response.json()
-        api_key = api_key_data["key"]
+        print(f"List monitors status: {list_response.status_code}")
+        if list_response.status_code != 200:
+            print(f"List error: {list_response.text}")
+        assert list_response.status_code == 200
         
         # Use API key to create a monitor
-        api_headers = {"X-API-Key": api_key}
         create_monitor_response = httpx.post(
             f"{base_url}/api/monitors",
             json={
@@ -274,16 +313,33 @@ class TestE2EDockerWorkflow:
             headers=api_headers,
             timeout=10
         )
+        if create_monitor_response.status_code != 200:
+            print(f"\n=== ERROR CREATING MONITOR ===")
+            print(f"Status: {create_monitor_response.status_code}")
+            print(f"Response: {create_monitor_response.text}")
+            
+            # Get container logs to see the actual error
+            print(f"\n=== CONTAINER LOGS (last 100 lines) ===")
+            logs = container.get_logs()
+            if isinstance(logs, tuple) and len(logs) >= 2:
+                stdout_log = logs[0].decode() if logs[0] else ""
+                stderr_log = logs[1].decode() if logs[1] else ""
+                log_str = stdout_log + "\n" + stderr_log
+            else:
+                log_str = logs[0].decode() if isinstance(logs, tuple) else str(logs)
+            log_lines = log_str.split('\n')
+            print('\n'.join(log_lines[-100:]))
+            print(f"\n=== END LOGS ===")
         assert create_monitor_response.status_code == 200
         
-        # List monitors with API key
-        list_response = httpx.get(
+        # List monitors again to verify
+        list_response2 = httpx.get(
             f"{base_url}/api/monitors",
             headers=api_headers,
             timeout=10
         )
-        assert list_response.status_code == 200
-        monitors = list_response.json()
+        assert list_response2.status_code == 200
+        monitors = list_response2.json()
         assert len(monitors) == 1
         assert monitors[0]["name"] == "API Key Monitor"
     
@@ -292,7 +348,7 @@ class TestE2EDockerWorkflow:
         """
         Test that invalid authentication is rejected
         """
-        base_url = app_container
+        base_url = app_container["url"]
         
         # Try to create monitor without auth
         response = httpx.post(

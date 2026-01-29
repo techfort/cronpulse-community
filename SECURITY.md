@@ -47,7 +47,7 @@ CronPulse Community Edition includes the following security measures:
 We take security seriously. If you discover a security vulnerability, please:
 
 1. **DO NOT** open a public GitHub issue
-2. Email security concerns to: [your-security-email@example.com]
+2. Email security concerns to: gionataminichino@gmail.com
 3. Include:
    - Description of the vulnerability
    - Steps to reproduce

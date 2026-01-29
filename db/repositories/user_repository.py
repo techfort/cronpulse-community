@@ -73,12 +73,3 @@ class UserRepository:
         if api_key:
             self.db.delete(api_key)
             self.db.commit()
-
-    def assign_pricing_plan(self, user_id: int, plan_id: int):
-        user = self.get_user_by_id(user_id)
-        if user:
-            user.pricing_plan_id = plan_id
-            self.db.commit()
-            self.db.refresh(user)
-            return user
-        return None

@@ -21,12 +21,15 @@ def create_monitor(
     current_user: User = Depends(get_current_user),
     monitor_service: MonitorService = Depends(get_monitor_service),
 ):
+    # Convert Pydantic HttpUrl to string for database storage
+    webhook_url_str = str(monitor.webhook_url) if monitor.webhook_url else None
+    
     return monitor_service.create_monitor(
         monitor.name,
         monitor.interval,
         current_user.id,
         monitor.email_recipient,
-        monitor.webhook_url,
+        webhook_url_str,
         monitor.expires_at,
     )
 
@@ -38,13 +41,16 @@ def update_monitor(
     current_user: User = Depends(get_current_user),
     monitor_service: MonitorService = Depends(get_monitor_service),
 ):
+    # Convert Pydantic HttpUrl to string for database storage
+    webhook_url_str = str(monitor.webhook_url) if monitor.webhook_url else None
+    
     return monitor_service.update_monitor(
         monitor_id,
         current_user.id,
         monitor.name,
         monitor.interval,
         monitor.email_recipient,
-        monitor.webhook_url,
+        webhook_url_str,
         monitor.expires_at,
     )
 

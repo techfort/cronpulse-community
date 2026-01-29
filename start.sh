@@ -27,7 +27,7 @@ if [ ! -f .env ]; then
     
     echo "✅ Generated JWT secret"
     echo ""
-    echo "⚠️  IMPORTANT: Edit .env and add your BREVO_API_KEY for email alerts"
+    echo "⚠️  IMPORTANT: Edit .env to add SMTP settings for email alerts (optional)"
     echo ""
 fi
 

@@ -1,1 +1,3 @@
 testcontainers[postgres]>=4.0.0
+psycopg2-binary
+passlib[argon2]
