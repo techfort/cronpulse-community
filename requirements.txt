@@ -1,6 +1,7 @@
 fastapi
 uvicorn
 sqlalchemy
+psycopg2-binary
 passlib[argon2]
 python-multipart
 jinja2
@@ -11,6 +12,7 @@ PyJWT
 flake8
 black
 pytest
+httpx
 email-validator
 slowapi
 alembic
