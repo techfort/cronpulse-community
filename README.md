@@ -2,7 +2,7 @@
 
 > **"Just tell me when it breaks."**
 
-A lightweight, self-hosted monitoring solution for your background jobs, scheduled tasks, and automated services. Get instant alerts when your critical processes fail to check in.
+A lightweight, self-hosted monitoring solution for your background jobs, scheduled tasks, and automated services. Get instant alerts via email or webhooks when your critical processes fail to check in.
 
 ## Why CronPulse?
 
@@ -126,7 +126,7 @@ uvicorn main:app --reload
 
 ### Email Setup
 
-CronPulse uses SMTP for sending email alerts. **Email is optional** - you can use webhook-only monitoring if preferred.
+CronPulse uses SMTP for sending email alerts. **Email is optional** - you can skip this entirely and use webhook-only monitoring if you prefer to route alerts to Slack, Discord, PagerDuty, or other webhook-based services.
 
 **Skip Email Setup:**
 - During initial setup, check "Skip email configuration (I'll only use webhooks)"
